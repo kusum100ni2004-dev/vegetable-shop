@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Cart</title>
+    <link rel="stylesheet" href="cart.css">
+</head>
+
+<body>
+
+<header>
+    <div class="logo">🥕 Fresh Grocery</div>
+
+    <nav>
+        <a href="home.html">Home</a>
+        <a href="cart.html">Cart</a>
+    </nav>
+</header>
+
+
+<section class="cart-page">
+
+<h1>🛒 My Cart</h1>
+
+
+<div id="cartItems" class="cart-container"></div>
+
+
+<h2 id="total"></h2>
+
+
+<a href="contact.html">
+<button class="place-btn" onclick="placeOrder()">
+Place Order
+</button>
+</a>
+
+
+</section>
+
+
+
+<script>
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+const cartDiv = document.getElementById("cartItems");
+
+let total = 0;
+
+
+if(cart.length === 0){
+
+    cartDiv.innerHTML = 
+    "<h2>Your cart is empty 🛒</h2>";
+
+}
+
+else{
+
+cart.forEach(item => {
+
+
+total += item.price * item.quantity;
+
+
+cartDiv.innerHTML += `
+
+<div class="cart-card">
+
+<h3>${item.name}</h3>
+
+<p>Price : ₹${item.price}</p>
+
+<p>Quantity : ${item.quantity}</p>
+
+<p>
+Total : ₹${item.price * item.quantity}
+</p>
+
+
+</div>
+
+`;
+
+});
+
+
+}
+
+
+document.getElementById("total").innerText =
+"Total Price : ₹" + total;
+
+
+
+function placeOrder(){
+
+alert("Order placed successfully 🥳");
+
+}
+
+
+
+</script>
+
+
+</body>
+</html>

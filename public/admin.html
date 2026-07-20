@@ -1,0 +1,166 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+<title>Admin Panel</title>
+
+<style>
+body{
+font-family:Arial;
+padding:30px;
+}
+
+input{
+display:block;
+margin:10px 0;
+padding:10px;
+width:300px;
+}
+
+button{
+padding:10px 20px;
+background:green;
+color:white;
+border:none;
+cursor:pointer;
+}
+</style>
+
+</head>
+<body>
+
+<h1>Add Product</h1>
+
+<input type="text" id="name" placeholder="Product Name">
+
+<input type="number" id="price" placeholder="Price">
+
+<input type="file" id="image">
+
+<button onclick="addProduct()">Add Product</button>
+
+
+
+<h1>Orders</h1>
+
+<div id="orders"></div>
+
+<script>
+
+
+
+
+function addProduct(){
+
+let name=document.getElementById("name").value;
+let price=document.getElementById("price").value;
+let file=document.getElementById("image").files[0];
+
+let reader=new FileReader();
+
+reader.onload=function(){
+
+let products=
+JSON.parse(localStorage.getItem("products")) || [];
+
+products.push({
+name:name,
+price:price,
+image:reader.result
+});
+
+localStorage.setItem(
+"products",
+JSON.stringify(products)
+);
+
+alert("Product Added Successfully");
+
+};
+
+reader.readAsDataURL(file);
+
+}
+
+
+
+let orders =
+JSON.parse(localStorage.getItem("orders")) || [];
+
+let html = "";
+
+orders.forEach((order,index)=>{
+
+html += `<h2>Order ${index+1}</h2>`;
+html += `<p>${order.date}</p>`;
+
+order.items.forEach(item=>{
+
+html += `
+<p>
+${item.name}
+|
+Qty:${item.qty}
+|
+₹${item.price * item.qty}
+</p>
+`;
+
+});
+
+html += "<hr>";
+});
+
+document.getElementById("orders").innerHTML = html;
+
+</script>
+
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Panel</title>
+</head>
+<body>
+
+<h1>Orders</h1>
+
+<div id="orders"></div>
+
+<script>
+
+let orders =
+JSON.parse(localStorage.getItem("orders")) || [];
+
+let html = "";
+
+orders.forEach((order,index)=>{
+
+html += `<h2>Order ${index+1}</h2>`;
+html += `<p>${order.date}</p>`;
+
+order.items.forEach(item=>{
+
+html += `
+<p>
+${item.name}
+|
+Qty:${item.qty}
+|
+₹${item.price * item.qty}
+</p>
+`;
+
+});
+
+html += "<hr>";
+});
+
+document.getElementById("orders").innerHTML = html;
+
+</script>
+
+</body>
+</html>
