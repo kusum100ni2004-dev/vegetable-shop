@@ -67,6 +67,10 @@ app.delete("/api/products/:id", async (req, res) => {
   }
 });
 
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/public/home.html");
+});
+
 app.listen(process.env.PORT || 5000, () => {
   console.log("Server Running On Port 5000");
 });
