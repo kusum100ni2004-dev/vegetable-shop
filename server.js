@@ -1,4 +1,5 @@
-require("dotenv").config(); 
+require("dotenv").config();
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -10,10 +11,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-
-mongoose.connect(process.env.MONGODB_URl)
-.then(() => console.log("MongoDB Connected"))
-.catch(err => console.log(err));
+mongoose.connect(process.env.MONGODB_URL)
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => console.log(err));
 
 app.post("/api/orders", async (req, res) => {
 
