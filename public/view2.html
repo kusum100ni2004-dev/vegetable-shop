@@ -32,10 +32,13 @@
             
             <!-- <div id="login-btn" class="fas fa-user"></div> -->
         </div>
-        <p id="item" >🛒item</p>
-            <ul id="you"> </ul>
-           <input type="submit" name="submit" class="btn" onclick="contact()" >
+          
+       <a href="cart.html">
+    <input type="button" value="Go To Cart" class="btn">
+</a>    
     </header>   
+    
+
    
  <!-- header section ends -->   
 <section>
@@ -82,13 +85,13 @@
         </div>
       </div> 
       <br><br><br>
-      <!-- <hr>
+      <hr>
 
       <h1 style="text-align:center; margin-top:40px;">
     Admin Added Products
-</h1> -->
+</h1>
 
-<!-- <div class="material" id="adminProducts"></div> -->
+<div class="material" id="adminProducts"></div>
       
 </section>
    
@@ -136,10 +139,38 @@
 
 <section class="credit">created by kusum | 4627/21</section>
 
+
+
+<script src="view.js"></script>
+
+<script>
+async function loadAdminProducts(){
+    const res = await fetch("http://localhost:5000/api/products");
+    const products = await res.json();
+    let container = document.getElementById("adminProducts");
+    container.innerHTML = "";
+    products.forEach(product => {
+        container.innerHTML += `
+            <div class="mat1">
+                <img src="${product.image}" alt="">
+                <h1>${product.name}</h1>
+                <h2>Rs ${product.price}</h2>
+                <div class="add">
+                    <h1><button class="sub">-</button> ADD <button class="sum">+</button></h1>
+                </div>
+            </div>
+        `;
+    });
+}
+loadAdminProducts();
+</script>
+</body>
+</html>
+
 <!-- footer section ends -->  
 
  <!-- custom css file link  -->
-<script src="view.js"></script>
+<!-- <script src="view.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -170,6 +201,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 });
-</script>
+</script> -->
 </body>
 </html>

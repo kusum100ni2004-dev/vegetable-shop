@@ -16,90 +16,136 @@
     </nav>
 </header>
 
-
 <section class="cart-page">
 
-<h1>🛒 My Cart</h1>
+    <h1>🛒 My Cart</h1>
 
+    <div id="cartItems" class="cart-container"></div>
 
-<div id="cartItems" class="cart-container"></div>
+    <h2 id="total"></h2>
 
-
-<h2 id="total"></h2>
-
-
-<a href="contact.html">
-<button class="place-btn" onclick="placeOrder()">
-Place Order
-</button>
-</a>
-
+    <!-- <a href="contact.html">
+        <button class="place-btn" onclick="placeOrder()">
+            Place Order
+        </button>
+    </a> -->
+    <button class="place-btn" onclick="placeOrder()">Place Order</button>
 
 </section>
-
-
 
 <script>
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-const cartDiv = document.getElementById("cartItems");
+function displayCart() {
 
-let total = 0;
+    const cartDiv = document.getElementById("cartItems");
+    const totalDiv = document.getElementById("total");
 
+    cartDiv.innerHTML = "";
 
-if(cart.length === 0){
+    let total = 0;
 
-    cartDiv.innerHTML = 
-    "<h2>Your cart is empty 🛒</h2>";
+    if(cart.length === 0){
 
+        cartDiv.innerHTML = "<h2>Your cart is empty 🛒</h2>";
+        totalDiv.innerText = "";
+        return;
+    }
+
+    cart.forEach((item,index) => {
+
+        total += item.price * item.quantity;
+
+        cartDiv.innerHTML += `
+
+        <div class="cart-card">
+
+            <h3>${item.name}</h3>
+
+            <p>Price : ₹${item.price}</p>
+
+            <p>
+                <button onclick="decreaseQty(${index})">-</button>
+
+                <strong> ${item.quantity} </strong>
+
+                <button onclick="increaseQty(${index})">+</button>
+            </p>
+
+            <p>
+                Total : ₹${item.price * item.quantity}
+            </p>
+
+            <button onclick="removeItem(${index})">
+                Remove
+            </button>
+
+        </div>
+
+        `;
+    });
+
+    totalDiv.innerText = "Total Price : ₹" + total;
 }
 
-else{
+function increaseQty(index){
 
-cart.forEach(item => {
+    cart[index].quantity++;
 
+    localStorage.setItem("cart", JSON.stringify(cart));
 
-total += item.price * item.quantity;
-
-
-cartDiv.innerHTML += `
-
-<div class="cart-card">
-
-<h3>${item.name}</h3>
-
-<p>Price : ₹${item.price}</p>
-
-<p>Quantity : ${item.quantity}</p>
-
-<p>
-Total : ₹${item.price * item.quantity}
-</p>
-
-
-</div>
-
-`;
-
-});
-
-
+    displayCart();
 }
 
+function decreaseQty(index){
 
-document.getElementById("total").innerText =
-"Total Price : ₹" + total;
+    cart[index].quantity--;
 
+    if(cart[index].quantity <= 0){
 
+        cart.splice(index,1);
+    }
 
-function placeOrder(){
+    localStorage.setItem("cart", JSON.stringify(cart));
 
-alert("Order placed successfully 🥳");
-
+    displayCart();
 }
 
+function removeItem(index){
 
+    cart.splice(index,1);
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    displayCart();
+}
+async function placeOrder(){
+
+    if(cart.length === 0){
+        alert("Cart is empty");
+        return;
+    }
+
+    let total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    const res = await fetch("http://localhost:5000/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: cart, total: total })
+    });
+
+    const data = await res.json();
+
+    if(data.success){
+        alert("Order placed successfully 🥳");
+        localStorage.removeItem("cart");
+        cart = [];
+        window.location.href = "contact.html";
+    }
+}
+
+displayCart(); 
 
 </script>
 

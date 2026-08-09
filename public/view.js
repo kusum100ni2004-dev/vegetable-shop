@@ -1,69 +1,120 @@
 let searchForm = document.querySelector('.search-form');
 
-document.querySelector('#search-btn').onclick = () =>{
+document.querySelector('#search-btn').onclick = () => {
     searchForm.classList.toggle('active');
-
-    if(typeof navbar !== "undefined") navbar.classList.remove('active');
-    if(typeof loginForm !== "undefined") loginForm.classList.remove('active');
 };
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-const addButtons = document.querySelectorAll(".sum");
-const subButtons = document.querySelectorAll(".sub");
+function saveCart() {
+    localStorage.setItem("cart", JSON.stringify(cart));
+}
 
-addButtons.forEach(button => {
+document.addEventListener("click", (e) => {
 
-    button.addEventListener("click", () => {
+    const productDiv = e.target.closest(".mat1");
+    if (!productDiv) return;
 
-        const productDiv = button.closest(".mat1");
+    const name = productDiv.querySelector("h1").innerText;
+    const price = parseInt(productDiv.querySelector("h2").innerText.replace("Rs", ""));
 
-        const name = productDiv.querySelector("h1").innerText;
+    const existing = cart.find(item => item.name === name);
 
-        const priceText = productDiv.querySelector("h2").innerText;
-
-        const price = parseInt(priceText.replace("Rs", ""));
-
-        const existing = cart.find(item => item.name === name);
-
-        if (existing) {
-            existing.quantity++;
-        } else {
-            cart.push({
-                name: name,
-                price: price,
-                quantity: 1
-            });
-        }
-
-        localStorage.setItem("cart", JSON.stringify(cart));
-
+    if (e.target.classList.contains("sum")) {
+        existing ? existing.quantity++ : cart.push({ name, price, quantity: 1 });
         alert(name + " Added To Cart");
-    });
-
-});
-
-subButtons.forEach(button => {
-
-    button.addEventListener("click", () => {
-
-        const productDiv = button.closest(".mat1");
-
-        const name = productDiv.querySelector("h1").innerText;
-
-        const index = cart.findIndex(item => item.name === name);
-
-        if (index !== -1) {
-
-            cart[index].quantity--;
-
-            if (cart[index].quantity <= 0) {
-                cart.splice(index, 1);
+    }
+    else if (e.target.classList.contains("sub")) {
+        if (existing) {
+            existing.quantity--;
+            if (existing.quantity <= 0) {
+                cart = cart.filter(item => item.name !== name);
             }
-
-            localStorage.setItem("cart", JSON.stringify(cart));
         }
+    }
+    else return;
 
-    });
-
+    saveCart();
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+// let searchForm = document.querySelector('.search-form');
+
+// document.querySelector('#search-btn').onclick = () =>{
+//     searchForm.classList.toggle('active');
+
+//     if(typeof navbar !== "undefined") navbar.classList.remove('active');
+//     if(typeof loginForm !== "undefined") loginForm.classList.remove('active');
+// };
+
+// let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+// const addButtons = document.querySelectorAll(".sum");
+// const subButtons = document.querySelectorAll(".sub");
+
+// addButtons.forEach(button => {
+
+//     button.addEventListener("click", () => {
+
+//         const productDiv = button.closest(".mat1");
+
+//         const name = productDiv.querySelector("h1").innerText;
+
+//         const priceText = productDiv.querySelector("h2").innerText;
+
+//         const price = parseInt(priceText.replace("Rs", ""));
+
+//         const existing = cart.find(item => item.name === name);
+
+//         if (existing) {
+//             existing.quantity++;
+//         } else {
+//             cart.push({
+//                 name: name,
+//                 price: price,
+//                 quantity: 1
+//             });
+//         }
+
+//         localStorage.setItem("cart", JSON.stringify(cart));
+
+//         alert(name + " Added To Cart");
+//     });
+
+// });
+
+// subButtons.forEach(button => {
+
+//     button.addEventListener("click", () => {
+
+//         const productDiv = button.closest(".mat1");
+
+//         const name = productDiv.querySelector("h1").innerText;
+
+//         const index = cart.findIndex(item => item.name === name);
+
+//         if (index !== -1) {
+
+//             cart[index].quantity--;
+
+//             if (cart[index].quantity <= 0) {
+//                 cart.splice(index, 1);
+//             }
+
+//             localStorage.setItem("cart", JSON.stringify(cart));
+//         }
+
+//     });
+
+// });
