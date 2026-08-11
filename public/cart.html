@@ -121,6 +121,7 @@ function removeItem(index){
     displayCart();
 }
 
+
 async function placeOrder() {
 
     if (cart.length === 0) {
@@ -152,6 +153,10 @@ async function placeOrder() {
 
             alert("Order placed successfully 🥳");
 
+            localStorage.removeItem("cart");
+            cart = [];
+
+            window.location.href = "contact.html";
 
         } else {
 
