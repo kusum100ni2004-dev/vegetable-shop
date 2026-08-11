@@ -1,319 +1,372 @@
+```html
 <!DOCTYPE html>
 <html>
 <head>
-<title>Admin Panel</title>
+    <title>Admin Panel</title>
 
-<style>
-body{
-font-family:Arial;
-padding:30px;
-}
+    <style>
+        body {
+            font-family: Arial;
+            padding: 30px;
+        }
 
-input{
-display:block;
-margin:10px 0;
-padding:10px;
-width:300px;
-}
+        input {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            width: 300px;
+        }
 
-button{
-padding:10px 20px;
-background:green;
-color:white;
-border:none;
-cursor:pointer;
-}
-</style>
+        button {
+            padding: 10px 20px;
+            background: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        .product-card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            width: 300px;
+        }
+
+        .product-card img {
+            max-width: 120px;
+            max-height: 120px;
+        }
+
+        .order-card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 15px 0;
+            width: 400px;
+        }
+    </style>
 
 </head>
+
 <body>
 
-<h1>Add Product</h1>
+    <h1>Add Product</h1>
 
-<input type="text" id="name" placeholder="Product Name">
+    <input
+        type="text"
+        id="name"
+        placeholder="Product Name"
+    >
 
-<input type="number" id="price" placeholder="Price">
+    <input
+        type="number"
+        id="price"
+        placeholder="Price"
+    >
 
-<input type="file" id="image">
+    <input
+        type="file"
+        id="image"
+        accept="image/*"
+    >
 
-<button onclick="addProduct()">Add Product</button>
-
-<h1>Admin Added Products</h1>
-<div id="adminProducts"></div>
-
-<h1>Orders</h1>
-
-<div id="orders"></div>
-
-<div id="cartItems" class="cart-container"></div>
+    <button onclick="addProduct()">Add Product</button>
 
 
-<h2 id="total"></h2>
+    <h1>Admin Added Products</h1>
 
-<script>
+    <div id="adminProducts"></div>
 
-async function addProduct(){
 
-    let name = document.getElementById("name").value;
-    let price = document.getElementById("price").value;
-    let file = document.getElementById("image").files[0];
+    <h1>Orders</h1>
 
-    if(!file){
-        alert("Please select an image");
-        return;
-    }
+    <div id="orders"></div>
 
-    let reader = new FileReader();
 
-    reader.onload = async function(){
+    <script>
 
-        const res = await fetch("http://localhost:5000/api/products", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                name: name,
-                price: price,
-                image: reader.result
-            })
-        });
+        // =========================
+        // ADD PRODUCT
+        // =========================
 
-        const data = await res.json();
+        async function addProduct() {
 
-        if(data.success){
-            alert("Product Added Successfully");
-            location.reload();
+            const name = document.getElementById("name").value.trim();
+            const price = document.getElementById("price").value;
+            const file = document.getElementById("image").files[0];
+
+            if (!name) {
+                alert("Please enter product name");
+                return;
+            }
+
+            if (!price) {
+                alert("Please enter product price");
+                return;
+            }
+
+            if (!file) {
+                alert("Please select an image");
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = async function () {
+
+                try {
+
+                    const res = await fetch("/api/products", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            name: name,
+                            price: Number(price),
+                            image: reader.result
+                        })
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok && data.success) {
+
+                        alert("Product Added Successfully 🎉");
+
+                        document.getElementById("name").value = "";
+                        document.getElementById("price").value = "";
+                        document.getElementById("image").value = "";
+
+                        loadProducts();
+
+                    } else {
+
+                        alert(
+                            "Product add failed: " +
+                            (data.error || "Something went wrong")
+                        );
+
+                        console.log("Add Product Error:", data);
+                    }
+
+                } catch (error) {
+
+                    console.error("Add Product Error:", error);
+
+                    alert(
+                        "Server se connection nahi ho raha. Please try again."
+                    );
+                }
+            };
+
+            reader.readAsDataURL(file);
         }
-    };
 
-    reader.readAsDataURL(file);
-}
 
-async function loadProducts(){
+        // =========================
+        // LOAD PRODUCTS
+        // =========================
 
-    const res = await fetch("http://localhost:5000/api/products");
-    const products = await res.json();
+        async function loadProducts() {
 
-    let productHtml = "";
+            try {
 
-    products.forEach(product => {
-        productHtml += `
-        <div style="border:1px solid #ccc;padding:10px;margin:10px 0;">
-            <img src="${product.image}" width="120"><br><br>
-            <b>${product.name}</b><br>
-            ₹${product.price}<br><br>
-            <button onclick="deleteProduct('${product._id}')">Delete Product</button>
-        </div>
-        `;
-    });
+                const res = await fetch("/api/products");
 
-    document.getElementById("adminProducts").innerHTML = productHtml;
-}
+                if (!res.ok) {
+                    throw new Error("Products load nahi ho rahe");
+                }
 
-async function deleteProduct(id){
-    await fetch("http://localhost:5000/api/products/" + id, {
-        method: "DELETE"
-    });
-    loadProducts();
-}
+                const products = await res.json();
 
-async function loadOrders(){
+                let productHtml = "";
 
-    const res = await fetch("http://localhost:5000/api/orders");
-    const orders = await res.json();
+                if (products.length === 0) {
 
-    let html = "";
+                    productHtml = "<h3>No products added yet.</h3>";
 
-    orders.forEach((order, index) => {
-        html += `<h2>Order ${index+1}</h2>`;
-        html += `<p>${new Date(order.createdAt).toLocaleString()}</p>`;
+                } else {
 
-        order.items.forEach(item => {
-            html += `<p>${item.name} | Qty:${item.quantity} | ₹${item.price * item.quantity}</p>`;
-        });
+                    products.forEach(product => {
 
-        html += `<p><b>Total: ₹${order.total}</b></p><hr>`;
-    });
+                        productHtml += `
+                            <div class="product-card">
 
-    document.getElementById("orders").innerHTML = html;
-}
+                                <img
+                                    src="${product.image}"
+                                    alt="${product.name}"
+                                >
 
-loadProducts();
-loadOrders();
+                                <br><br>
 
-</script>
+                                <b>${product.name}</b>
 
+                                <br>
+
+                                ₹${product.price}
+
+                                <br><br>
+
+                                <button
+                                    onclick="deleteProduct('${product._id}')"
+                                >
+                                    Delete Product
+                                </button>
+
+                            </div>
+                        `;
+                    });
+                }
+
+                document.getElementById("adminProducts").innerHTML =
+                    productHtml;
+
+            } catch (error) {
+
+                console.error("Load Products Error:", error);
+
+                document.getElementById("adminProducts").innerHTML =
+                    "<p>Products load nahi ho rahe.</p>";
+            }
+        }
+
+
+        // =========================
+        // DELETE PRODUCT
+        // =========================
+
+        async function deleteProduct(id) {
+
+            if (!confirm("Are you sure you want to delete this product?")) {
+                return;
+            }
+
+            try {
+
+                const res = await fetch("/api/products/" + id, {
+                    method: "DELETE"
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+
+                    alert("Product Deleted Successfully");
+
+                    loadProducts();
+
+                } else {
+
+                    alert(
+                        "Delete failed: " +
+                        (data.error || "Something went wrong")
+                    );
+
+                    console.log("Delete Error:", data);
+                }
+
+            } catch (error) {
+
+                console.error("Delete Product Error:", error);
+
+                alert(
+                    "Server se connection nahi ho raha."
+                );
+            }
+        }
+
+
+        // =========================
+        // LOAD ORDERS
+        // =========================
+
+        async function loadOrders() {
+
+            try {
+
+                const res = await fetch("/api/orders");
+
+                if (!res.ok) {
+                    throw new Error("Orders load nahi ho rahe");
+                }
+
+                const orders = await res.json();
+
+                let html = "";
+
+                if (orders.length === 0) {
+
+                    html = "<h3>No orders yet.</h3>";
+
+                } else {
+
+                    orders.forEach((order, index) => {
+
+                        html += `
+                            <div class="order-card">
+
+                                <h2>
+                                    Order ${index + 1}
+                                </h2>
+
+                                <p>
+                                    <b>Date:</b>
+                                    ${new Date(
+                                        order.createdAt
+                                    ).toLocaleString()}
+                                </p>
+                        `;
+
+                        order.items.forEach(item => {
+
+                            html += `
+                                <p>
+                                    ${item.name}
+                                    |
+                                    Qty: ${item.quantity}
+                                    |
+                                    ₹${item.price * item.quantity}
+                                </p>
+                            `;
+                        });
+
+                        html += `
+                                <p>
+                                    <b>
+                                        Total: ₹${order.total}
+                                    </b>
+                                </p>
+
+                            </div>
+                        `;
+                    });
+                }
+
+                document.getElementById("orders").innerHTML = html;
+
+            } catch (error) {
+
+                console.error("Load Orders Error:", error);
+
+                document.getElementById("orders").innerHTML =
+                    "<p>Orders load nahi ho rahe.</p>";
+            }
+        }
+
+
+        // =========================
+        // PAGE LOAD
+        // =========================
+
+        loadProducts();
+        loadOrders();
+
+    </script>
 
 </body>
 </html>
-
-
-
-
-
-
-<!-- function addProduct(){
-
-let name = document.getElementById("name").value;
-let price = document.getElementById("price").value;
-let file = document.getElementById("image").files[0];
-
-if(!file){
-alert("Please select an image");
-return;
-}
-
-let reader = new FileReader();
-
-reader.onload = function(){
-
-let products =
-JSON.parse(localStorage.getItem("products")) || [];
-
-products.push({
-name: name,
-price: price,
-image: reader.result
-});
-
-localStorage.setItem(
-"products",
-JSON.stringify(products)
-);
-
-alert("Product Added Successfully");
-location.reload();
-
-};
-
-reader.readAsDataURL(file);
-
-}
-
-let orders =
-JSON.parse(localStorage.getItem("orders")) || [];
-
-let html = "";
-
-orders.forEach((order,index)=>{
-
-html += `<h2>Order ${index+1}</h2>`;
-html += `<p>${order.date}</p>`;
-
-order.items.forEach(item=>{
-
-html += `
-<p>
-${item.name} |
-Qty:${item.qty} |
-₹${item.price * item.qty}
-</p>
-`;
-
-});
-
-html += "<hr>";
-
-});
-
-document.getElementById("orders").innerHTML = html;
-
-let products =
-JSON.parse(localStorage.getItem("products")) || [];
-
-let productHtml = "";
-
-products.forEach((product,index)=>{
-
-productHtml += `
-<div style="border:1px solid #ccc;padding:10px;margin:10px 0;">
-<img src="${product.image}" width="120"><br><br>
-<b>${product.name}</b><br>
-₹${product.price}<br><br>
-
-<button onclick="deleteProduct(${index})">
-Delete Product
-</button>
-
-</div>
-`;
-
-});
-
-document.getElementById("adminProducts").innerHTML = productHtml;
-
-function deleteProduct(index){
-
-let products =
-JSON.parse(localStorage.getItem("products")) || [];
-
-products.splice(index,1);
-
-localStorage.setItem(
-"products",
-JSON.stringify(products)
-);
-
-location.reload();
-
-}
-
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-const cartDiv = document.getElementById("cartItems");
-
-let total = 0;
-
-
-if(cart.length === 0){
-
-    cartDiv.innerHTML = 
-    "<h2>Your cart is empty 🛒</h2>";
-
-}
-
-else{
-
-cart.forEach(item => {
-
-
-total += item.price * item.quantity;
-
-
-cartDiv.innerHTML += `
-
-<div class="cart-card">
-
-<h3>${item.name}</h3>
-
-<p>Price : ₹${item.price}</p>
-
-<p>Quantity : ${item.quantity}</p>
-
-<p>
-Total : ₹${item.price * item.quantity}
-</p>
-
-
-</div>
-
-`;
-
-});
-
-
-}
-
-
-document.getElementById("total").innerText =
-"Total Price : ₹" + total;
-
-
-
-function placeOrder(){
-
-alert("Order placed successfully 🥳");
-
-} -->
-
-
-
+```
