@@ -120,13 +120,16 @@ function removeItem(index){
 
     displayCart();
 }
+
 async function placeOrder() {
+
     if (cart.length === 0) {
         alert("Cart is empty");
         return;
     }
 
     try {
+
         let total = cart.reduce(
             (sum, item) => sum + item.price * item.quantity,
             0
@@ -146,22 +149,36 @@ async function placeOrder() {
         const data = await res.json();
 
         if (res.ok && data.success) {
+
             alert("Order placed successfully 🥳");
 
             localStorage.removeItem("cart");
             cart = [];
 
-            window.location.href = "contact.html";
+            // Cart screen ko update karo
+            displayCart();
+
         } else {
-            alert("Order failed: " + (data.error || "Something went wrong"));
+
+            alert(
+                "Order failed: " +
+                (data.error || "Something went wrong")
+            );
+
             console.log("Order error:", data);
         }
 
     } catch (error) {
+
         console.error("Place Order Error:", error);
-        alert("Server se connection nahi ho raha. Please try again.");
+
+        alert(
+            "Server se connection nahi ho raha. Please try again."
+        );
     }
 }
+
+
 
 </script>
 
